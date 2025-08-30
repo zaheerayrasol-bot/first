@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuantumQR - Premium QR Code Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        
+        :root {
+            --primary: #6366f1;
+            --secondary: #8b5cf6;
+            --accent: #06b6d4;
+            --dark: #1e293b;
+            --light: #f8fafc;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .nav-pill {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .nav-pill.active {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: var(--primary);
+        }
+        
+        .qr-preview {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+        }
+        
+        .qr-preview:hover {
+            transform: translateY(-5px) scale(1.02);
+        }
+        
+        .feature-card {
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.03);
+        }
+        
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-3px);
+        }
+        
+        input[type="range"] {
+            -webkit-appearance: none;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 0 15px var(--primary);
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.2);
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .scan-animation {
+            animation: scan 2s ease-in-out infinite;
+        }
+        
+        @keyframes scan {
+            0%, 100% { transform: translateY(-10px); opacity: 0.7; }
+            50% { transform: translateY(10px); opacity: 1; }
+        }
+        
+        .pattern-option {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .pattern-option.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+    </style>
+</head>
+<body class="text-white">
+    <!-- Header -->
+    <header class="container mx-auto px-4 py-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-qrcode text-white"></i>
+                </div>
+                <h1 class="text-2xl font-bold gradient-text">QuantumQR</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button class="px-4 py-2 rounded-lg bg-white bg-opacity-10 hover:bg-opacity-20 transition">
+                    <i class="fas fa-moon mr-2"></i>Dark Mode
+                </button>
+                <button class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 transition">
+                    <i class="fas fa-user mr-2"></i>Sign In
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <div class="grid lg:grid-cols-3 gap-8">
+            <!-- Left Sidebar - Navigation -->
+            <div class="lg:col-span-1">
+                <div class="glass-card p-6 sticky top-6">
+                    <h2 class="text-xl font-semibold mb-6">QR Types</h2>
+                    <div class="space-y-2">
+                        <button class="nav-pill active w-full text-left px-4 py-3 rounded-lg flex items-center justify-between">
+                            <span><i class="fas fa-link mr-3"></i>URL</span>
+                            <i class="fas fa-check-circle text-indigo-400"></i>
+                        </button>
+                        <button class="nav-pill w-full text-left px-4 py-3 rounded-lg flex items-center justify-between">
+                            <span><i class="fas fa-font mr-3"></i>Text</span>
+                        </button>
+                        <button class="nav-pill w-full text-left px-4 py-3 rounded-lg flex items-center justify-between">
+                            <span><i class="fas fa-user mr-3"></i>Contact</span>
+                        </button>
+                        <button class="nav-pill w-full text-left px-4 py-3 rounded-lg flex items-center justify-between">
+                            <span><i class="fas fa-wifi mr-3"></i>WiFi</span>
+                        </button>
+                        <button class="nav-pill w-full text-left px-4 py-3 rounded-lg flex items-center justify-between">
+                            <span><i class="fas fa-envelope mr-3"></i>Email</span>
+                        </button>
+                        <button class="nav-pill w-full text-left px-4 py-3 rounded-lg flex items-center justify-between">
+                            <span><i class="fas fa-calendar mr-3"></i>Event</span>
+                        </button>
+                    </div>
+
+                    <div class="mt-8">
+                        <h2 class="text-xl font-semibold mb-4">Quick Actions</h2>
+                        <div class="space-y-2">
+                            <button class="w-full px-4 py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 transition flex items-center">
+                                <i class="fas fa-history mr-3"></i>Recent Codes
+                            </button>
+                            <button class="w-full px-4 py-3 rounded-lg bg-green-600 hover:bg-green-700 transition flex items-center">
+                                <i class="fas fa-download mr-3"></i>Batch Generate
+                            </button>
+                            <button class="w-full px-4 py-3 rounded-lg bg-purple-600 hover:bg-purple-700 transition flex items-center">
+                                <i class="fas fa-chart-line mr-3"></i>Analytics
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- URL Input Section -->
+                <div class="glass-card p-8">
+                    <h2 class="text-2xl font-bold mb-6">Create URL QR Code</h2>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-3">Enter Website URL</label>
+                            <div class="relative">
+                                <i class="fas fa-link absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                <input 
+                                    type="url" 
+                                    placeholder="https://your-website.com"
+                                    class="w-full pl-12 pr-4 py-4 bg-white bg-opacity-5 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                    value="https://example.com"
+                                >
+                            </div>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium mb-3">QR Code Size</label>
+                                <input type="range" min="100" max="1000" value="300" class="w-full">
+                                <div class="flex justify-between text-sm text-gray-400 mt-2">
+                                    <span>Small</span>
+                                    <span>300px</span>
+                                    <span>Large</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-3">Error Correction</label>
+                                <select class="w-full px-4 py-3 bg-white bg-opacity-5 border border-gray-600 rounded-lg">
+                                    <option>Low (L) - 7%</option>
+                                    <option>Medium (M) - 15%</option>
+                                    <option selected>High (Q) - 25%</option>
+                                    <option>Highest (H) - 30%</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium mb-3">QR Color</label>
+                                <div class="flex items-center space-x-4">
+                                    <input type="color" value="#000000" class="w-12 h-12 rounded">
+                                    <input type="text" value="#000000" class="flex-1 px-3 py-2 bg-white bg-opacity-5 border border-gray-600 rounded">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-3">Background Color</label>
+                                <div class="flex items-center space-x-4">
+                                    <input type="color" value="#ffffff" class="w-12 h-12 rounded">
+                                    <input type="text" value="#ffffff" class="flex-1 px-3 py-2 bg-white bg-opacity-5 border border-gray-600 rounded">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium mb-3">Pattern Style</label>
+                            <div class="grid grid-cols-4 gap-4">
+                                <div class="pattern-option active p-4 rounded-lg bg-white bg-opacity-5 text-center cursor-pointer">
+                                    <div class="w-12 h-12 bg-black mx-auto mb-2 rounded"></div>
+                                    <span class="text-xs">Square</span>
+                                </div>
+                                <div class="pattern-option p-4 rounded-lg bg-white bg-opacity-5 text-center cursor-pointer">
+                                    <div class="w-12 h-12 bg-black mx-auto mb-2 rounded-full"></div>
+                                    <span class="text-xs">Rounded</span>
+                                </div>
+                                <div class="pattern-option p-4 rounded-lg bg-white bg-opacity-5 text-center cursor-pointer">
+                                    <div class="w-12 h-12 bg-black mx-auto mb-2" style="clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)"></div>
+                                    <span class="text-xs">Diamond</span>
+                                </div>
+                                <div class="pattern-option p-4 rounded-lg bg-white bg-opacity-5 text-center cursor-pointer">
+                                    <div class="w-12 h-12 bg-black mx-auto mb-2" style="clip-path: circle(50% at 50% 50%)"></div>
+                                    <span class="text-xs">Circle</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                                <span>Add Logo</span>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="slider"></span>
+                                </label>
+                                <span>Gradient Background</span>
+                            </div>
+                        </div>
+
+                        <button class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 py-4 px-6 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105">
+                            <i class="fas fa-bolt mr-2"></i>Generate QR Code
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Preview Section -->
+                <div class="glass-card p-8">
+                    <h2 class="text-2xl font-bold mb-6">Preview & Download</h2>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="flex flex-col items-center">
+                            <div class="qr-preview bg-white p-8 rounded-2xl mb-6 relative">
+                                <canvas id="qr-canvas" width="300" height="300" class="mx-auto"></canvas>
+                                <div class="absolute top-4 right-4">
+                                    <div class="w-6 h-6 bg-green-400 rounded-full animate-pulse"></div>
+                                </div>
+                            </div>
+                            <div class="scan-animation text-center">
+                                <i class="fas fa-mobile-alt text-3xl text-indigo-400"></i>
+                                <p class="text-sm text-gray-400 mt-2">Scan preview</p>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-6">
+                            <div class="stat-card p-6 rounded-xl">
+                                <h3 class="font-semibold mb-4">QR Code Details</h3>
+                                <div class="space-y-3 text-sm">
+                                    <div class="flex justify-between">
+                                        <span>Type:</span>
+                                        <span class="text-indigo-400">URL</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Size:</span>
+                                        <span class="text-indigo-400">300x300px</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Data Capacity:</span>
+                                        <span class="text-indigo-400">2.9KB</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Error Correction:</span>
+                                        <span class="text-indigo-400">High (Q)</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-3">
+                                <h3 class="font-semibold">Download Options</h3>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <button class="py-3 px-4 bg-white bg-opacity-10 hover:bg-opacity-20 rounded-lg transition flex items-center justify-center">
+                                        <i class="fas fa-download mr-2"></i>PNG
+                                    </button>
+                                    <button class="py-3 px-4 bg-white bg-opacity-10 hover:bg-opacity-20 rounded-lg transition flex items-center justify-center">
+                                        <i class="fas fa-download mr-2"></i>SVG
+                                    </button>
+                                    <button class="py-3 px-4 bg-white bg-opacity-10 hover:bg-opacity-20 rounded-lg transition flex items-center justify-center">
+                                        <i class="fas fa-download mr-2"></i>PDF
+                                    </button>
+                                    <button class="py-3 px-4 bg-white bg-opacity-10 hover:bg-opacity-20 rounded-lg transition flex items-center justify-center">
+                                        <i class="fas fa-download mr-2"></i>EPS
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="space-y-3">
+                                <h3 class="font-semibold">Share</h3>
+                                <div class="flex space-x-3">
+                                    <button class="flex-1 py-2 px-3 bg-blue-600 hover:bg-blue-700 rounded-lg transition">
+                                        <i class="fab fa-facebook"></i>
+                                    </button>
+                                    <button class="flex-1 py-2 px-3 bg-blue-400 hover:bg-blue-500 rounded-lg transition">
+                                        <i class="fab fa-twitter"></i>
+                                    </button>
+                                    <button class="flex-1 py-2 px-3 bg-red-600 hover:bg-red-700 rounded-lg transition">
+                                        <i class="fab fa-pinterest"></i>
+                                    </button>
+                                    <button class="flex-1 py-2 px-3 bg-gray-700 hover:bg-gray-800 rounded-lg transition">
+                                        <i class="fas fa-link"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Features Section -->
+                <div class="glass-card p-8">
+                    <h2 class="text-2xl font-bold mb-6">Premium Features</h2>
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="feature-card p-6 rounded-xl">
+                            <div class="w-12 h-12 bg-indigo-600 rounded-lg flex items-center justify-center mb-4">
+                                <i class="fas fa-chart-line text-white"></i>
+                            </div>
+                            <h3 class="font-semibold mb-2">Scan Analytics</h3>
+                            <p class="text-gray-400 text-sm">Track QR code scans with detailed analytics and location data</p>
+                        </div>
+                        <div class="feature-card p-6 rounded-xl">
+                            <div class="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mb-4">
+                                <i class="fas fa-users text-white"></i>
+                            </div>
+                            <h3 class="font-semibold mb-2">Team Collaboration</h3>
+                            <p class="text-gray-400 text-sm">Work with your team on QR code projects and campaigns</p>
+                        </div>
+                        <div class="feature-card p-6 rounded-xl">
+                            <div class="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mb-4">
+                                <i class="fas fa-palette text-white"></i>
+                            </div>
+                            <h3 class="font-semibold mb-2">Brand Kit</h3>
+                            <p class="text-gray-400 text-sm">Save your brand colors and logos for quick access</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const qrCanvas = document.getElementById('qr-canvas');
+            const ctx = qrCanvas.getContext('2d');
+            
+            // Initialize with sample QR code
+            generateSampleQR();
+
+            function generateSampleQR() {
+                const text = 'https://example.com';
+                
+                QRCode.toCanvas(qrCanvas, text, {
+                    width: 300,
+                    margin: 1,
+                    color: {
+                        dark: '#000000',
+                        light: '#ffffff'
+                    }
+                }, function(error) {
+                    if (error) console.error(error);
+                });
+            }
+
+            // Add interactivity to navigation pills
+            const navPills = document.querySelectorAll('.nav-pill');
+            navPills.forEach(pill => {
+                pill.addEventListener('click', function() {
+                    navPills.forEach(p => p.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // Pattern selection
+            const patternOptions = document.querySelectorAll('.pattern-option');
+            patternOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    patternOptions.forEach(o => o.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // Color input synchronization
+            const colorInputs = document.querySelectorAll('input[type="color"]');
+            colorInputs.forEach(input => {
+                const textInput = input.nextElementSibling;
+                input.addEventListener('input', function() {
+                    textInput.value = this.value;
+                });
+                textInput.addEventListener('input', function() {
+                    if (this.value.match(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/)) {
+                        input.value = this.value;
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
