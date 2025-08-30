@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuantumQR Studio - Professional QR Code Generator</title>
+    <title>QuantumQR Pro - Advanced QR Code Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -42,24 +42,6 @@
             border-radius: 24px;
         }
         
-        .gradient-border::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent));
-            border-radius: 26px;
-            z-index: -1;
-            animation: border-glow 3s ease-in-out infinite alternate;
-        }
-        
-        @keyframes border-glow {
-            0% { opacity: 0.7; filter: blur(8px); }
-            100% { opacity: 1; filter: blur(12px); }
-        }
-        
         .qr-canvas-container {
             perspective: 1000px;
         }
@@ -68,10 +50,6 @@
             transform-style: preserve-3d;
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-        }
-        
-        .qr-canvas:hover {
-            transform: rotateY(5deg) rotateX(5deg) translateY(-10px);
         }
         
         .pattern-grid {
@@ -90,10 +68,6 @@
             border-color: var(--primary);
             box-shadow: 0 0 25px rgba(139, 92, 246, 0.4);
             transform: scale(1.05);
-        }
-        
-        .pattern-option:hover {
-            transform: scale(1.08);
         }
         
         .color-picker-enhanced {
@@ -128,16 +102,6 @@
             font-weight: 600;
         }
         
-        .tab-button {
-            transition: all 0.3s ease;
-            border-bottom: 2px solid transparent;
-        }
-        
-        .tab-button.active {
-            border-bottom-color: var(--primary);
-            color: white;
-        }
-        
         .loading-spinner {
             border: 3px solid rgba(255, 255, 255, 0.1);
             border-top: 3px solid var(--primary);
@@ -152,15 +116,78 @@
             100% { transform: rotate(360deg); }
         }
         
-        .success-check {
-            color: #10b981;
-            font-size: 2rem;
-            animation: scaleUp 0.3s ease-in-out;
+        .logo-preview {
+            max-width: 80px;
+            max-height: 80px;
+            object-fit: contain;
+            border-radius: 8px;
         }
         
-        @keyframes scaleUp {
-            0% { transform: scale(0); }
-            100% { transform: scale(1); }
+        .slider-with-value {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .slider-value {
+            min-width: 50px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.2);
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: var(--primary);
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+        
+        .gradient-preview {
+            height: 40px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            margin-top: 8px;
         }
     </style>
 </head>
@@ -173,8 +200,8 @@
                     <i class="fas fa-qrcode text-2xl text-white"></i>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">QuantumQR Studio</h1>
-                    <p class="text-sm text-gray-400">Professional QR Code Generator</p>
+                    <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">QuantumQR Pro</h1>
+                    <p class="text-sm text-gray-400">Advanced QR Code Generator with Logo Support</p>
                 </div>
             </div>
         </div>
@@ -197,7 +224,78 @@
                                     rows="3"
                                     class="w-full pl-12 pr-4 py-4 bg-white bg-opacity-5 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent code-font"
                                     placeholder="https://your-website.com or any text..."
-                                >https://quantumqr.studio</textarea>
+                                >https://quantumqr.pro</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logo Settings -->
+                <div class="glass-morphism p-6">
+                    <h2 class="text-xl font-semibold mb-4">Logo Settings</h2>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="flex items-center gap-3 mb-4">
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="logo-enabled" checked>
+                                    <span class="toggle-slider"></span>
+                                </div>
+                                <span>Enable Logo</span>
+                            </label>
+                            
+                            <div id="logo-upload-area" class="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center cursor-pointer hover:border-purple-500 transition-colors">
+                                <i class="fas fa-upload text-3xl text-gray-400 mb-2"></i>
+                                <p class="text-sm text-gray-400">Click to upload logo</p>
+                                <p class="text-xs text-gray-500">PNG, JPG, SVG (Max 2MB)</p>
+                                <input type="file" id="logo-upload" accept="image/*" class="hidden" />
+                            </div>
+                            
+                            <div id="logo-preview-container" class="mt-4 text-center hidden">
+                                <img id="logo-preview" class="logo-preview mx-auto mb-2" />
+                                <button id="remove-logo" class="text-red-400 text-sm hover:text-red-300">
+                                    <i class="fas fa-trash mr-1"></i>Remove
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="logo-settings">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Logo Size</label>
+                                    <div class="slider-with-value">
+                                        <input type="range" id="logo-size" min="10" max="50" value="25" class="flex-1" />
+                                        <span id="logo-size-value" class="slider-value">25%</span>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Logo Position</label>
+                                    <select id="logo-position" class="w-full px-4 py-3 bg-white bg-opacity-5 border border-gray-600 rounded-lg">
+                                        <option value="center">Center</option>
+                                        <option value="top-left">Top Left</option>
+                                        <option value="top-right">Top Right</option>
+                                        <option value="bottom-left">Bottom Left</option>
+                                        <option value="bottom-right">Bottom Right</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Logo Background</label>
+                                    <div class="color-picker-enhanced">
+                                        <div class="flex items-center space-x-3">
+                                            <input type="color" id="logo-bg-color" value="#ffffff" class="w-10 h-10 rounded" />
+                                            <input type="text" id="logo-bg-color-text" value="#ffffff" class="flex-1 px-3 py-2 bg-white bg-opacity-5 border border-gray-600 rounded code-font" />
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center gap-3">
+                                    <div class="toggle-switch">
+                                        <input type="checkbox" id="logo-border" checked>
+                                        <span class="toggle-slider"></span>
+                                    </div>
+                                    <span>Add Border</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -207,36 +305,29 @@
                 <div class="glass-morphism p-6">
                     <h2 class="text-xl font-semibold mb-4">Design Customization</h2>
                     
-                    <!-- Color Scheme -->
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium mb-3">Color Scheme</label>
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div class="color-picker-enhanced">
-                                <label class="block text-xs text-gray-400 mb-2">QR Color</label>
-                                <div class="flex items-center space-x-3">
-                                    <input type="color" id="qr-color" value="#8b5cf6" class="w-10 h-10 rounded" />
-                                    <input type="text" id="qr-color-text" value="#8b5cf6" class="flex-1 px-3 py-2 bg-white bg-opacity-5 border border-gray-600 rounded code-font" />
-                                </div>
+                    <div class="grid md:grid-cols-2 gap-6 mb-6">
+                        <div class="color-picker-enhanced">
+                            <label class="block text-xs text-gray-400 mb-2">QR Color</label>
+                            <div class="flex items-center space-x-3">
+                                <input type="color" id="qr-color" value="#8b5cf6" class="w-10 h-10 rounded" />
+                                <input type="text" id="qr-color-text" value="#8b5cf6" class="flex-1 px-3 py-2 bg-white bg-opacity-5 border border-gray-600 rounded code-font" />
                             </div>
-                            <div class="color-picker-enhanced">
-                                <label class="block text-xs text-gray-400 mb-2">Background Color</label>
-                                <div class="flex items-center space-x-3">
-                                    <input type="color" id="bg-color" value="#0f172a" class="w-10 h-10 rounded" />
-                                    <input type="text" id="bg-color-text" value="#0f172a" class="flex-1 px-3 py-2 bg-white bg-opacity-5 border border-gray-600 rounded code-font" />
-                                </div>
+                        </div>
+                        <div class="color-picker-enhanced">
+                            <label class="block text-xs text-gray-400 mb-2">Background Color</label>
+                            <div class="flex items-center space-x-3">
+                                <input type="color" id="bg-color" value="#0f172a" class="w-10 h-10 rounded" />
+                                <input type="text" id="bg-color-text" value="#0f172a" class="flex-1 px-3 py-2 bg-white bg-opacity-5 border border-gray-600 rounded code-font" />
                             </div>
                         </div>
                     </div>
 
-                    <!-- Size & Quality -->
-                    <div class="grid md:grid-cols-2 gap-4 mb-6">
+                    <div class="grid md:grid-cols-2 gap-6 mb-6">
                         <div>
                             <label class="block text-sm font-medium mb-2">QR Code Size</label>
-                            <input type="range" id="qr-size" min="100" max="1000" value="400" class="w-full mb-2" />
-                            <div class="flex justify-between text-xs text-gray-400">
-                                <span>Small</span>
-                                <span id="size-value">400px</span>
-                                <span>4K Ready</span>
+                            <div class="slider-with-value">
+                                <input type="range" id="qr-size" min="100" max="1000" value="400" class="flex-1" />
+                                <span id="size-value" class="slider-value">400px</span>
                             </div>
                         </div>
                         <div>
@@ -250,8 +341,26 @@
                         </div>
                     </div>
 
-                    <!-- Generate Button -->
-                    <button id="generate-btn" class="w-full bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 py-4 px-6 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Margin Size</label>
+                            <div class="slider-with-value">
+                                <input type="range" id="qr-margin" min="0" max="20" value="2" class="flex-1" />
+                                <span id="margin-value" class="slider-value">2px</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Dot Style</label>
+                            <select id="dot-style" class="w-full px-4 py-3 bg-white bg-opacity-5 border border-gray-600 rounded-lg">
+                                <option value="square">Square</option>
+                                <option value="rounded">Rounded</option>
+                                <option value="dots">Dots</option>
+                                <option value="classy">Classy</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button id="generate-btn" class="w-full bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 py-4 px-6 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 mt-6">
                         <i class="fas fa-bolt mr-2"></i>Generate QR Code
                     </button>
 
@@ -273,7 +382,6 @@
                             <canvas id="qr-canvas" width="400" height="400" class="mx-auto"></canvas>
                             <div class="scan-beam absolute inset-x-0 top-0 h-2 pointer-events-none"></div>
                             
-                            <!-- Status Badge -->
                             <div id="status-badge" class="absolute top-4 right-4">
                                 <span class="feature-badge">Ready</span>
                             </div>
@@ -312,6 +420,10 @@
                             <span class="text-gray-400">Error Correction</span>
                             <span id="spec-error" class="font-semibold text-green-400">High (Q)</span>
                         </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Logo</span>
+                            <span id="spec-logo" class="font-semibold code-font">Enabled</span>
+                        </div>
                     </div>
                 </div>
 
@@ -349,7 +461,10 @@
             const bgColorText = document.getElementById('bg-color-text');
             const qrSize = document.getElementById('qr-size');
             const sizeValue = document.getElementById('size-value');
+            const qrMargin = document.getElementById('qr-margin');
+            const marginValue = document.getElementById('margin-value');
             const errorCorrection = document.getElementById('error-correction');
+            const dotStyle = document.getElementById('dot-style');
             const generateBtn = document.getElementById('generate-btn');
             const generationStatus = document.getElementById('generation-status');
             const statusBadge = document.getElementById('status-badge');
@@ -359,39 +474,145 @@
             const specSize = document.getElementById('spec-size');
             const specCapacity = document.getElementById('spec-capacity');
             const specError = document.getElementById('spec-error');
+            const specLogo = document.getElementById('spec-logo');
             const ctx = qrCanvas.getContext('2d');
 
+            // Logo elements
+            const logoEnabled = document.getElementById('logo-enabled');
+            const logoUpload = document.getElementById('logo-upload');
+            const logoUploadArea = document.getElementById('logo-upload-area');
+            const logoPreviewContainer = document.getElementById('logo-preview-container');
+            const logoPreview = document.getElementById('logo-preview');
+            const removeLogo = document.getElementById('remove-logo');
+            const logoSize = document.getElementById('logo-size');
+            const logoSizeValue = document.getElementById('logo-size-value');
+            const logoPosition = document.getElementById('logo-position');
+            const logoBgColor = document.getElementById('logo-bg-color');
+            const logoBgColorText = document.getElementById('logo-bg-color-text');
+            const logoBorder = document.getElementById('logo-border');
+
             let currentQRCode = null;
+            let logoImage = null;
 
-            // Initialize with sample QR code
-            generateQRCode();
+            // Initialize
+            initializeApp();
 
-            // Update size display
-            qrSize.addEventListener('input', function() {
-                const size = this.value;
-                sizeValue.textContent = `${size}px`;
-                specSize.textContent = `${size}×${size}px`;
-            });
+            function initializeApp() {
+                // Update displays
+                updateSliderValues();
+                
+                // Event listeners
+                setupEventListeners();
+                
+                // Generate initial QR code
+                generateQRCode();
+            }
 
-            // Color synchronization
-            function syncColors() {
-                qrColor.addEventListener('input', () => qrColorText.value = qrColor.value);
-                bgColor.addEventListener('input', () => bgColorText.value = bgColor.value);
-                qrColorText.addEventListener('input', function() {
-                    if (this.value.match(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/)) {
-                        qrColor.value = this.value;
-                    }
-                });
-                bgColorText.addEventListener('input', function() {
-                    if (this.value.match(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/)) {
-                        bgColor.value = this.value;
+            function updateSliderValues() {
+                sizeValue.textContent = `${qrSize.value}px`;
+                marginValue.textContent = `${qrMargin.value}px`;
+                logoSizeValue.textContent = `${logoSize.value}%`;
+                specSize.textContent = `${qrSize.value}×${qrSize.value}px`;
+            }
+
+            function setupEventListeners() {
+                // Sliders
+                qrSize.addEventListener('input', updateSliderValues);
+                qrMargin.addEventListener('input', updateSliderValues);
+                logoSize.addEventListener('input', updateSliderValues);
+
+                // Color synchronization
+                setupColorSync();
+
+                // Logo functionality
+                setupLogoFunctionality();
+
+                // Generate button
+                generateBtn.addEventListener('click', generateQRCode);
+
+                // Download functionality
+                setupDownloadFunctionality();
+
+                // Keyboard support
+                qrContent.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        generateQRCode();
                     }
                 });
             }
-            syncColors();
 
-            // Generate QR code
-            generateBtn.addEventListener('click', generateQRCode);
+            function setupColorSync() {
+                const colorPairs = [
+                    [qrColor, qrColorText],
+                    [bgColor, bgColorText],
+                    [logoBgColor, logoBgColorText]
+                ];
+
+                colorPairs.forEach(([colorInput, textInput]) => {
+                    colorInput.addEventListener('input', () => textInput.value = colorInput.value);
+                    textInput.addEventListener('input', function() {
+                        if (this.value.match(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/)) {
+                            colorInput.value = this.value;
+                        }
+                    });
+                });
+            }
+
+            function setupLogoFunctionality() {
+                // Logo upload
+                logoUploadArea.addEventListener('click', () => logoUpload.click());
+                logoUpload.addEventListener('change', handleLogoUpload);
+                removeLogo.addEventListener('click', removeUploadedLogo);
+
+                // Logo toggle
+                logoEnabled.addEventListener('change', function() {
+                    const enabled = this.checked;
+                    document.getElementById('logo-settings').style.opacity = enabled ? '1' : '0.5';
+                    document.getElementById('logo-settings').style.pointerEvents = enabled ? 'auto' : 'none';
+                    specLogo.textContent = enabled ? 'Enabled' : 'Disabled';
+                    if (enabled && logoImage) generateQRCode();
+                });
+            }
+
+            function handleLogoUpload(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('Logo size must be less than 2MB');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    logoImage = new Image();
+                    logoImage.onload = function() {
+                        logoPreview.src = e.target.result;
+                        logoPreviewContainer.classList.remove('hidden');
+                        generateQRCode();
+                    };
+                    logoImage.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            function removeUploadedLogo() {
+                logoImage = null;
+                logoUpload.value = '';
+                logoPreviewContainer.classList.add('hidden');
+                generateQRCode();
+            }
+
+            function setupDownloadFunctionality() {
+                downloadBtn.addEventListener('click', () => downloadQRCode('png'));
+                downloadOptions.forEach(option => {
+                    option.addEventListener('click', function() {
+                        const format = this.getAttribute('data-format');
+                        downloadQRCode(format);
+                    });
+                });
+            }
 
             function generateQRCode() {
                 const content = qrContent.value.trim();
@@ -401,9 +622,11 @@
                 }
 
                 const size = parseInt(qrSize.value);
+                const margin = parseInt(qrMargin.value);
                 const qrColorValue = qrColor.value;
                 const bgColorValue = bgColor.value;
                 const errorLevel = errorCorrection.value;
+                const hasLogo = logoEnabled.checked && logoImage;
 
                 // Show loading
                 generationStatus.classList.remove('hidden');
@@ -421,80 +644,119 @@
                 try {
                     QRCode.toCanvas(qrCanvas, content, {
                         width: size,
-                        margin: 2,
+                        margin: margin,
                         color: {
                             dark: qrColorValue,
                             light: bgColorValue
                         },
                         errorCorrectionLevel: errorLevel
                     }, function(error) {
-                        generationStatus.classList.add('hidden');
-                        generateBtn.disabled = false;
-
                         if (error) {
-                            console.error('QR generation error:', error);
-                            statusBadge.innerHTML = '<span class="feature-badge" style="background:linear-gradient(135deg, #ef4444, #dc2626)">Error</span>';
-                            alert('Error generating QR code. Please try again.');
+                            handleGenerationError(error);
                             return;
                         }
 
-                        // Success
-                        statusBadge.innerHTML = '<span class="feature-badge">Success!</span>';
-                        downloadBtn.disabled = false;
-                        downloadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                        downloadBtn.classList.add('opacity-100', 'cursor-pointer');
-
-                        // Update specs
-                        const dataSize = Math.round(content.length / 1024 * 100) / 100;
-                        specCapacity.textContent = dataSize > 0 ? `${dataSize}KB` : `${content.length} chars`;
-                        
-                        const errorText = {
-                            'L': 'Low (L)',
-                            'M': 'Medium (M)',
-                            'Q': 'High (Q)',
-                            'H': 'Ultra (H)'
-                        }[errorLevel];
-                        specError.textContent = errorText;
-
-                        currentQRCode = {
-                            content: content,
-                            size: size,
-                            qrColor: qrColorValue,
-                            bgColor: bgColorValue,
-                            errorLevel: errorLevel
-                        };
+                        if (hasLogo) {
+                            addLogoToQRCode(size);
+                        } else {
+                            finishGeneration(content, errorLevel);
+                        }
                     });
                 } catch (error) {
-                    generationStatus.classList.add('hidden');
-                    generateBtn.disabled = false;
-                    console.error('QR generation error:', error);
-                    statusBadge.innerHTML = '<span class="feature-badge" style="background:linear-gradient(135deg, #ef4444, #dc2626)">Error</span>';
-                    alert('Error generating QR code. Please try again.');
+                    handleGenerationError(error);
                 }
             }
 
-            // Download functionality
-            downloadBtn.addEventListener('click', function() {
-                if (!currentQRCode) return;
-                downloadQRCode('png');
-            });
+            function addLogoToQRCode(size) {
+                const logoSizePercent = parseInt(logoSize.value);
+                const logoWidth = (size * logoSizePercent) / 100;
+                const logoHeight = (logoImage.height * logoWidth) / logoImage.width;
 
-            downloadOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    if (!currentQRCode) return;
-                    const format = this.getAttribute('data-format');
-                    downloadQRCode(format);
-                });
-            });
+                let x, y;
+                const padding = size * 0.1;
+
+                switch (logoPosition.value) {
+                    case 'top-left':
+                        x = padding;
+                        y = padding;
+                        break;
+                    case 'top-right':
+                        x = size - logoWidth - padding;
+                        y = padding;
+                        break;
+                    case 'bottom-left':
+                        x = padding;
+                        y = size - logoHeight - padding;
+                        break;
+                    case 'bottom-right':
+                        x = size - logoWidth - padding;
+                        y = size - logoHeight - padding;
+                        break;
+                    default: // center
+                        x = (size - logoWidth) / 2;
+                        y = (size - logoHeight) / 2;
+                }
+
+                // Draw logo background
+                if (logoBorder.checked) {
+                    const bgPadding = logoWidth * 0.1;
+                    ctx.fillStyle = logoBgColor.value;
+                    ctx.fillRect(x - bgPadding, y - bgPadding, logoWidth + bgPadding * 2, logoHeight + bgPadding * 2);
+                }
+
+                // Draw logo
+                ctx.drawImage(logoImage, x, y, logoWidth, logoHeight);
+
+                finishGeneration(qrContent.value.trim(), errorCorrection.value);
+            }
+
+            function finishGeneration(content, errorLevel) {
+                generationStatus.classList.add('hidden');
+                generateBtn.disabled = false;
+                statusBadge.innerHTML = '<span class="feature-badge">Success!</span>';
+                downloadBtn.disabled = false;
+                downloadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                downloadBtn.classList.add('opacity-100', 'cursor-pointer');
+
+                // Update specs
+                const dataSize = Math.round(content.length / 1024 * 100) / 100;
+                specCapacity.textContent = dataSize > 0 ? `${dataSize}KB` : `${content.length} chars`;
+                
+                const errorText = {
+                    'L': 'Low (L)',
+                    'M': 'Medium (M)',
+                    'Q': 'High (Q)',
+                    'H': 'Ultra (H)'
+                }[errorLevel];
+                specError.textContent = errorText;
+
+                currentQRCode = {
+                    content: content,
+                    size: parseInt(qrSize.value),
+                    qrColor: qrColor.value,
+                    bgColor: bgColor.value,
+                    errorLevel: errorLevel,
+                    hasLogo: logoEnabled.checked && logoImage
+                };
+            }
+
+            function handleGenerationError(error) {
+                generationStatus.classList.add('hidden');
+                generateBtn.disabled = false;
+                console.error('QR generation error:', error);
+                statusBadge.innerHTML = '<span class="feature-badge" style="background:linear-gradient(135deg, #ef4444, #dc2626)">Error</span>';
+                alert('Error generating QR code. Please try again.');
+            }
 
             function downloadQRCode(format) {
+                if (!currentQRCode) return;
+
                 const link = document.createElement('a');
                 let filename = `qrcode-${Date.now()}.${format}`;
                 
                 if (format === 'svg') {
-                    // For SVG, we need to generate it separately
                     QRCode.toString(currentQRCode.content, {
-                        margin: 2,
+                        margin: parseInt(qrMargin.value),
                         color: {
                             dark: currentQRCode.qrColor,
                             light: currentQRCode.bgColor
@@ -502,7 +764,6 @@
                         errorCorrectionLevel: currentQRCode.errorLevel
                     }, function(error, string) {
                         if (error) {
-                            console.error('SVG generation error:', error);
                             alert('Error generating SVG. Please try again.');
                             return;
                         }
@@ -513,23 +774,11 @@
                         link.click();
                     });
                 } else {
-                    // For raster formats
                     link.download = filename;
                     link.href = qrCanvas.toDataURL(`image/${format}`);
                     link.click();
                 }
             }
-
-            // Generate on Enter key press
-            qrContent.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    generateQRCode();
-                }
-            });
-
-            // Initial specs update
-            specSize.textContent = `${qrSize.value}×${qrSize.value}px`;
         });
     </script>
 </body>
