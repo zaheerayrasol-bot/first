@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuantumQR Studio - Professional QR Code Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap');
+        
+        :root {
+            --primary: #8b5cf6;
+            --secondary: #06b6d4;
+            --accent: #f97316;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --surface: #1e293b;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--dark) 0%, #1e293b 50%, #334155 100%);
+            min-height: 100vh;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        
+        .code-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .glass-morphism {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+        }
+        
+        .gradient-border {
+            position: relative;
+            background: var(--surface);
+            border-radius: 24px;
+        }
+        
+        .gradient-border::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent));
+            border-radius: 26px;
+            z-index: -1;
+            animation: border-glow 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes border-glow {
+            0% { opacity: 0.7; filter: blur(8px); }
+            100% { opacity: 1; filter: blur(12px); }
+        }
+        
+        .qr-canvas-container {
+            perspective: 1000px;
+        }
+        
+        .qr-canvas {
+            transform-style: preserve-3d;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        }
+        
+        .qr-canvas:hover {
+            transform: rotateY(5deg) rotateX(5deg) translateY(-10px);
+        }
+        
+        .pattern-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            gap: 12px;
+        }
+        
+        .pattern-option {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+        
+        .pattern-option.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 25px rgba(139, 92, 246, 0.4);
+            transform: scale(1.05);
+        }
+        
+        .pattern-option:hover {
+            transform: scale(1.08);
+        }
+        
+        .color-picker-enhanced {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 8px;
+        }
+        
+        .scan-beam {
+            background: linear-gradient(transparent, rgba(6, 182, 212, 0.3), transparent);
+            animation: scan 2s ease-in-out infinite;
+        }
+        
+        @keyframes scan {
+            0%, 100% { transform: translateY(-100%); opacity: 0; }
+            50% { transform: translateY(100%); opacity: 1; }
+        }
+        
+        .stats-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 20px;
+        }
+        
+        .feature-badge {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .tab-button {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .tab-button.active {
+            border-bottom-color: var(--primary);
+            color: white;
+        }
+        
+        .loading-spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .success-check {
+            color: #10b981;
+            font-size: 2rem;
+            animation: scaleUp 0.3s ease-in-out;
+        }
+        
+        @keyframes scaleUp {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="text-white">
+    <!-- Navigation -->
+    <nav class="glass-morphism mx-4 mt-4 p-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 bg-gradient-to-r from-purple-600 to-cyan-500 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-qrcode text-2xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">QuantumQR Studio</h1>
+                    <p class="text-sm text-gray-400">Professional QR Code Generator</p>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8">
+        <div class="grid xl:grid-cols-3 gap-8">
+            <!-- Left Panel - Design Controls -->
+            <div class="xl:col-span-2 space-y-8">
+                <!-- Content Input -->
+                <div class="glass-morphism p-6">
+                    <h2 class="text-xl font-semibold mb-4">QR Content</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Enter Text or URL</label>
+                            <div class="relative">
+                                <i class="fas fa-link absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                <textarea 
+                                    id="qr-content"
+                                    rows="3"
+                                    class="w-full pl-12 pr-4 py-4 bg-white bg-opacity-5 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent code-font"
+                                    placeholder="https://your-website.com or any text..."
+                                >https://quantumqr.studio</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Design Customization -->
+                <div class="glass-morphism p-6">
+                    <h2 class="text-xl font-semibold mb-4">Design Customization</h2>
+                    
+                    <!-- Color Scheme -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium mb-3">Color Scheme</label>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="color-picker-enhanced">
+                                <label class="block text-xs text-gray-400 mb-2">QR Color</label>
+                                <div class="flex items-center space-x-3">
+                                    <input type="color" id="qr-color" value="#8b5cf6" class="w-10 h-10 rounded" />
+                                    <input type="text" id="qr-color-text" value="#8b5cf6" class="flex-1 px-3 py-2 bg-white bg-opacity-5 border border-gray-600 rounded code-font" />
+                                </div>
+                            </div>
+                            <div class="color-picker-enhanced">
+                                <label class="block text-xs text-gray-400 mb-2">Background Color</label>
+                                <div class="flex items-center space-x-3">
+                                    <input type="color" id="bg-color" value="#0f172a" class="w-10 h-10 rounded" />
+                                    <input type="text" id="bg-color-text" value="#0f172a" class="flex-1 px-3 py-2 bg-white bg-opacity-5 border border-gray-600 rounded code-font" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Size & Quality -->
+                    <div class="grid md:grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">QR Code Size</label>
+                            <input type="range" id="qr-size" min="100" max="1000" value="400" class="w-full mb-2" />
+                            <div class="flex justify-between text-xs text-gray-400">
+                                <span>Small</span>
+                                <span id="size-value">400px</span>
+                                <span>4K Ready</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Error Correction</label>
+                            <select id="error-correction" class="w-full px-4 py-3 bg-white bg-opacity-5 border border-gray-600 rounded-lg">
+                                <option value="L">Low (L) - 7%</option>
+                                <option value="M">Medium (M) - 15%</option>
+                                <option value="Q" selected>High (Q) - 25%</option>
+                                <option value="H">Ultra (H) - 30%</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Generate Button -->
+                    <button id="generate-btn" class="w-full bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 py-4 px-6 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105">
+                        <i class="fas fa-bolt mr-2"></i>Generate QR Code
+                    </button>
+
+                    <div id="generation-status" class="mt-4 text-center hidden">
+                        <div class="loading-spinner mx-auto mb-2"></div>
+                        <p class="text-sm text-gray-400">Generating QR code...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel - Preview & Export -->
+            <div class="space-y-8">
+                <!-- Real-time Preview -->
+                <div class="gradient-border p-8">
+                    <h2 class="text-xl font-semibold mb-6 text-center">Live Preview</h2>
+                    
+                    <div class="qr-canvas-container mb-6">
+                        <div class="qr-canvas bg-white p-8 rounded-2xl relative overflow-hidden">
+                            <canvas id="qr-canvas" width="400" height="400" class="mx-auto"></canvas>
+                            <div class="scan-beam absolute inset-x-0 top-0 h-2 pointer-events-none"></div>
+                            
+                            <!-- Status Badge -->
+                            <div id="status-badge" class="absolute top-4 right-4">
+                                <span class="feature-badge">Ready</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="flex items-center justify-center space-x-2 mb-4">
+                            <i class="fas fa-mobile-alt text-cyan-400"></i>
+                            <span class="text-sm text-gray-400">Scan simulation active</span>
+                        </div>
+                        
+                        <button id="download-btn" class="w-full py-3 px-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-lg font-semibold opacity-50 cursor-not-allowed" disabled>
+                            <i class="fas fa-download mr-2"></i>Download QR Code
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Technical Specifications -->
+                <div class="glass-morphism p-6">
+                    <h2 class="text-xl font-semibold mb-4">Specifications</h2>
+                    <div class="stats-card space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Format</span>
+                            <span class="font-semibold code-font">PNG</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Dimensions</span>
+                            <span id="spec-size" class="font-semibold code-font">400×400px</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Data Capacity</span>
+                            <span id="spec-capacity" class="font-semibold code-font">-</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Error Correction</span>
+                            <span id="spec-error" class="font-semibold text-green-400">High (Q)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export Options -->
+                <div class="glass-morphism p-6">
+                    <h2 class="text-xl font-semibold mb-4">Export Options</h2>
+                    <div class="space-y-3">
+                        <div class="grid grid-cols-2 gap-3">
+                            <button class="download-option py-3 px-4 bg-white bg-opacity-10 hover:bg-opacity-20 rounded-lg flex items-center justify-center" data-format="png">
+                                <i class="fas fa-file-image mr-2"></i>PNG
+                            </button>
+                            <button class="download-option py-3 px-4 bg-white bg-opacity-10 hover:bg-opacity-20 rounded-lg flex items-center justify-center" data-format="svg">
+                                <i class="fas fa-file-code mr-2"></i>SVG
+                            </button>
+                            <button class="download-option py-3 px-4 bg-white bg-opacity-10 hover:bg-opacity-20 rounded-lg flex items-center justify-center" data-format="jpeg">
+                                <i class="fas fa-file-image mr-2"></i>JPEG
+                            </button>
+                            <button class="download-option py-3 px-4 bg-white bg-opacity-10 hover:bg-opacity-20 rounded-lg flex items-center justify-center" data-format="webp">
+                                <i class="fas fa-file-image mr-2"></i>WEBP
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const qrContent = document.getElementById('qr-content');
+            const qrColor = document.getElementById('qr-color');
+            const qrColorText = document.getElementById('qr-color-text');
+            const bgColor = document.getElementById('bg-color');
+            const bgColorText = document.getElementById('bg-color-text');
+            const qrSize = document.getElementById('qr-size');
+            const sizeValue = document.getElementById('size-value');
+            const errorCorrection = document.getElementById('error-correction');
+            const generateBtn = document.getElementById('generate-btn');
+            const generationStatus = document.getElementById('generation-status');
+            const statusBadge = document.getElementById('status-badge');
+            const downloadBtn = document.getElementById('download-btn');
+            const downloadOptions = document.querySelectorAll('.download-option');
+            const qrCanvas = document.getElementById('qr-canvas');
+            const specSize = document.getElementById('spec-size');
+            const specCapacity = document.getElementById('spec-capacity');
+            const specError = document.getElementById('spec-error');
+            const ctx = qrCanvas.getContext('2d');
+
+            let currentQRCode = null;
+
+            // Initialize with sample QR code
+            generateQRCode();
+
+            // Update size display
+            qrSize.addEventListener('input', function() {
+                const size = this.value;
+                sizeValue.textContent = `${size}px`;
+                specSize.textContent = `${size}×${size}px`;
+            });
+
+            // Color synchronization
+            function syncColors() {
+                qrColor.addEventListener('input', () => qrColorText.value = qrColor.value);
+                bgColor.addEventListener('input', () => bgColorText.value = bgColor.value);
+                qrColorText.addEventListener('input', function() {
+                    if (this.value.match(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/)) {
+                        qrColor.value = this.value;
+                    }
+                });
+                bgColorText.addEventListener('input', function() {
+                    if (this.value.match(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/)) {
+                        bgColor.value = this.value;
+                    }
+                });
+            }
+            syncColors();
+
+            // Generate QR code
+            generateBtn.addEventListener('click', generateQRCode);
+
+            function generateQRCode() {
+                const content = qrContent.value.trim();
+                if (!content) {
+                    alert('Please enter some text or URL to generate QR code');
+                    return;
+                }
+
+                const size = parseInt(qrSize.value);
+                const qrColorValue = qrColor.value;
+                const bgColorValue = bgColor.value;
+                const errorLevel = errorCorrection.value;
+
+                // Show loading
+                generationStatus.classList.remove('hidden');
+                statusBadge.innerHTML = '<span class="feature-badge">Generating...</span>';
+                generateBtn.disabled = true;
+
+                // Resize canvas
+                qrCanvas.width = size;
+                qrCanvas.height = size;
+
+                // Clear canvas
+                ctx.fillStyle = bgColorValue;
+                ctx.fillRect(0, 0, size, size);
+
+                try {
+                    QRCode.toCanvas(qrCanvas, content, {
+                        width: size,
+                        margin: 2,
+                        color: {
+                            dark: qrColorValue,
+                            light: bgColorValue
+                        },
+                        errorCorrectionLevel: errorLevel
+                    }, function(error) {
+                        generationStatus.classList.add('hidden');
+                        generateBtn.disabled = false;
+
+                        if (error) {
+                            console.error('QR generation error:', error);
+                            statusBadge.innerHTML = '<span class="feature-badge" style="background:linear-gradient(135deg, #ef4444, #dc2626)">Error</span>';
+                            alert('Error generating QR code. Please try again.');
+                            return;
+                        }
+
+                        // Success
+                        statusBadge.innerHTML = '<span class="feature-badge">Success!</span>';
+                        downloadBtn.disabled = false;
+                        downloadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        downloadBtn.classList.add('opacity-100', 'cursor-pointer');
+
+                        // Update specs
+                        const dataSize = Math.round(content.length / 1024 * 100) / 100;
+                        specCapacity.textContent = dataSize > 0 ? `${dataSize}KB` : `${content.length} chars`;
+                        
+                        const errorText = {
+                            'L': 'Low (L)',
+                            'M': 'Medium (M)',
+                            'Q': 'High (Q)',
+                            'H': 'Ultra (H)'
+                        }[errorLevel];
+                        specError.textContent = errorText;
+
+                        currentQRCode = {
+                            content: content,
+                            size: size,
+                            qrColor: qrColorValue,
+                            bgColor: bgColorValue,
+                            errorLevel: errorLevel
+                        };
+                    });
+                } catch (error) {
+                    generationStatus.classList.add('hidden');
+                    generateBtn.disabled = false;
+                    console.error('QR generation error:', error);
+                    statusBadge.innerHTML = '<span class="feature-badge" style="background:linear-gradient(135deg, #ef4444, #dc2626)">Error</span>';
+                    alert('Error generating QR code. Please try again.');
+                }
+            }
+
+            // Download functionality
+            downloadBtn.addEventListener('click', function() {
+                if (!currentQRCode) return;
+                downloadQRCode('png');
+            });
+
+            downloadOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (!currentQRCode) return;
+                    const format = this.getAttribute('data-format');
+                    downloadQRCode(format);
+                });
+            });
+
+            function downloadQRCode(format) {
+                const link = document.createElement('a');
+                let filename = `qrcode-${Date.now()}.${format}`;
+                
+                if (format === 'svg') {
+                    // For SVG, we need to generate it separately
+                    QRCode.toString(currentQRCode.content, {
+                        margin: 2,
+                        color: {
+                            dark: currentQRCode.qrColor,
+                            light: currentQRCode.bgColor
+                        },
+                        errorCorrectionLevel: currentQRCode.errorLevel
+                    }, function(error, string) {
+                        if (error) {
+                            console.error('SVG generation error:', error);
+                            alert('Error generating SVG. Please try again.');
+                            return;
+                        }
+                        
+                        const blob = new Blob([string], { type: 'image/svg+xml' });
+                        link.href = URL.createObjectURL(blob);
+                        link.download = filename;
+                        link.click();
+                    });
+                } else {
+                    // For raster formats
+                    link.download = filename;
+                    link.href = qrCanvas.toDataURL(`image/${format}`);
+                    link.click();
+                }
+            }
+
+            // Generate on Enter key press
+            qrContent.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    generateQRCode();
+                }
+            });
+
+            // Initial specs update
+            specSize.textContent = `${qrSize.value}×${qrSize.value}px`;
+        });
+    </script>
+</body>
+</html>
